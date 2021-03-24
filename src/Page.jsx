@@ -1,28 +1,65 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import './page.scss';
+
+const styles = {
+  inputWrapper: {
+    marginTop: 20,
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  output: {
+    marginTop: 20,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+}
 
 const Page = () => {
+  const [info, setInfo] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+  const [output, setOutput] = useState([]);
+  const [strictCase, setStrictCase] = useState(true);
   const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
   const targetUrl = 'https://www.mrsoft.by/data.json';
+
   useEffect(() => {
     fetch(proxyUrl + targetUrl)
     .then(response => response.json())
-    .then(data => console.log(data))
+    .then(data => setInfo(data.data))
     .catch(error => console.log(error))
-  }, [])
+  }, []);
+
+  const lengthOnClickHandler = () => {
+  setOutput(info.filter(item => item.length > parseInt(inputValue, 10)));
+  setInputValue('');
+  }
+
+  const substringClickHandler = () => {
+    if (strictCase) {
+      setOutput(info.filter(item => item.includes(inputValue)));
+    } else {
+      setOutput(info.filter(item => item.toLowerCase().includes(inputValue.toLowerCase())));
+    }
+    setInputValue(''); 
+  }
+
   return (
     <div>
-      <div>
-        <input type="text" name="" id="" />
+      <div style={styles.inputWrapper}>
+        <input type="text"  value={inputValue} onChange={e => setInputValue(e.target.value)}/>
       </div>
-      <label>
-        Case Mode
-        <input type="checkbox" name="" id="" />
+      <label style={styles.inputWrapper}>
+        Case Mode {strictCase ? 'On' : 'Off'}
+        <input type="checkbox" onChange={() => setStrictCase(!strictCase)}/>
       </label>
-      <div>
-        <input type="button" value="String length" />
-        <input type="button" value="Substring" />
+      <div style={styles.inputWrapper}>
+        <input type="button" value="String length" onClick={lengthOnClickHandler}/>
+        <input type="button" value="Substring" onClick={substringClickHandler} />
       </div>
-      <div className="output"></div>
+      <div style={styles.output}>{output.map(item => {
+        return <div>{item}</div>
+      })}</div>
     </div>
   );
 };
